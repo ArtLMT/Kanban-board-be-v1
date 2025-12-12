@@ -1,0 +1,40 @@
+package com.lmt.Kanban.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "tasks")
+@AttributeOverride(name = "id", column = @Column(name = "task_id"))
+public class Task extends AbstractEntity {
+
+    @NotBlank(message = "Title can't be empty") // NotBlamk kiểm tra đầu vào, chặn FE gửi
+    @Column(nullable = false) // thằng này kiểm tra cấu trúc, chặn spl, be
+    private String title;
+
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", nullable = false)
+    private Status status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
+
+    // đứa tạo thì kh null đươc
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
+
+    // đứa nhận task thì có thể null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignee_id", nullable = true)
+    private User assignee;
+}
