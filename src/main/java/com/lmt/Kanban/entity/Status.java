@@ -13,7 +13,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "status")
+@Table(
+        name = "status",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"board_id", "name"})
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "status_id"))
 public class Status extends AbstractEntity{
 
@@ -23,10 +28,15 @@ public class Status extends AbstractEntity{
 
     private String color;
 
+    @Column(nullable = false)
+    private Integer position;
+
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "status", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
 }

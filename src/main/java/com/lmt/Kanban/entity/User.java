@@ -31,8 +31,7 @@ public class User extends AbstractEntity {
     @Column(name = "display_name", nullable = true, length = 100)
     private String displayName;
 
-    @ToString.Exclude // Khi gọi toString thì bỏ thằng này ra, nếu mà gọi luôn thằng này rồi trong thằng này lại gọi tiếp user thì toang, lặp vô tận rồi stack overflow luôn
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    // orphanRemoval = true: Nếu xóa User thì xóa luôn List Board của User đó đi
-    private List<Board> boards = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardMember> boardMemberships = new ArrayList<>();
+
 }
