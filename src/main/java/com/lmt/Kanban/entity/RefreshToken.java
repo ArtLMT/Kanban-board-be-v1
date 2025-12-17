@@ -20,7 +20,7 @@ public class RefreshToken {
     private String token;
 
     // Links the token to a specific user
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 

@@ -7,12 +7,18 @@ import com.lmt.Kanban.dto.request.RegisterRequest;
 import com.lmt.Kanban.dto.response.JwtResponse;
 import com.lmt.Kanban.entity.RefreshToken;
 import com.lmt.Kanban.entity.User;
+import com.lmt.Kanban.exception.GlobalExceptionHandler;
+import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.RefreshTokenRepository;
 import com.lmt.Kanban.repository.UserRepository;
 import com.lmt.Kanban.security.JwtUtils;
 import com.lmt.Kanban.service.impl.RefreshTokenServiceImpl;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -30,13 +36,14 @@ public class AuthController {
     private final RefreshTokenServiceImpl refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
 
     // ===================== LOGIN =====================
     @PostMapping("/login")
-    public JwtResponse login(@RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -47,48 +54,88 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String accessToken = jwtUtils.generateJwtToken(user.getUsername());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        return new JwtResponse(accessToken, refreshToken.getToken());
+        // ================= COOKIES =================
+
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(false); // true in prod (HTTPS)
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(15 * 60);
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken.getToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/api/auth/refresh");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60);
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+
+        // ================= RESPONSE BODY =================
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new JwtResponse(accessToken, refreshToken.getToken(), user.getUsername()));
     }
+
 
     // ===================== REFRESH TOKEN =====================
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<JwtResponse> refreshToken(
+            @CookieValue(name = "refreshToken", required = false) String refreshTokenValue,
+            HttpServletResponse response
+    ) {
+        if (refreshTokenValue == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         RefreshToken refreshToken = refreshTokenRepository
-                .findByToken(request.getRefreshToken())
+                .findByToken(refreshTokenValue)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
         if (refreshTokenService.isTokenExpired(refreshToken)) {
             refreshTokenService.revokeToken(refreshToken);
-            throw new RuntimeException("Refresh token expired");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String newAccessToken = jwtUtils.generateJwtToken(
-                refreshToken.getUser().getUsername()
-        );
+        String newAccessToken =
+                jwtUtils.generateJwtToken(refreshToken.getUser().getUsername());
+
+        Cookie accessCookie = new Cookie("accessToken", newAccessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(false);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(15 * 60);
+
+        response.addCookie(accessCookie);
 
         return ResponseEntity.ok(
-                new JwtResponse(newAccessToken, refreshToken.getToken())
+                new JwtResponse(newAccessToken, refreshTokenValue, userRepository.findByUsername(refreshToken.getUser().getUsername()).get().getUsername())
         );
     }
+
 
     // ===================== LOGOUT =====================
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
 
-        RefreshToken refreshToken = refreshTokenRepository
-                .findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+        Cookie accessCookie = new Cookie("accessToken", null);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
 
-        refreshTokenService.revokeToken(refreshToken);
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setPath("/api/auth/refresh");
+        refreshCookie.setMaxAge(0);
 
-        return ResponseEntity.ok("Logged out successfully");
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+
+        return ResponseEntity.noContent().build();
     }
+
 
     //====================== REGISTER
     @PostMapping("/register")

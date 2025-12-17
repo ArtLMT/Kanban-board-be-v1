@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         // Chỉ lấy User ra thôi, rồi dùng User đó để authenticate
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found: " + username));
+                        new UsernameNotFoundException("User not found: " + username +" At userDetailsServiceImpl"));
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())

@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Builder
 public class LoginRequest implements Serializable {
 
-    @NotBlank(message = "Email is required")
+//    @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     @Schema(
             description = "Email address of the user",
