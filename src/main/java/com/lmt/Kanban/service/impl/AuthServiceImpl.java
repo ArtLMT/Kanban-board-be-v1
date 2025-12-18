@@ -1,9 +1,8 @@
 package com.lmt.Kanban.service.impl;
 
 import com.lmt.Kanban.entity.RefreshToken;
-import com.lmt.Kanban.exception.EmailAlreadyUsedException;
-import com.lmt.Kanban.exception.NotFoundException;
-import com.lmt.Kanban.exception.UsernameAlreadyExistsException;
+import com.lmt.Kanban.exception.ConflictException;
+import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.RefreshTokenRepository;
 import com.lmt.Kanban.repository.UserRepository;
 import com.lmt.Kanban.security.JwtUtils;
@@ -47,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. Lấy User từ DB
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // 4. Sinh Token
         String accessToken = jwtUtils.generateJwtToken(user.getUsername());
@@ -60,10 +59,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new UsernameAlreadyExistsException("Username already taken");
+            throw new ConflictException("Username already taken");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyUsedException("Email already used");
+            throw new ConflictException("Email already used");
         }
 
         User user = new User();
