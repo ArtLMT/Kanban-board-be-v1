@@ -5,6 +5,7 @@ import com.lmt.Kanban.dto.request.LoginRequest;
 import com.lmt.Kanban.dto.request.RefreshTokenRequest;
 import com.lmt.Kanban.dto.request.RegisterRequest;
 import com.lmt.Kanban.dto.response.JwtResponse;
+import com.lmt.Kanban.entity.CustomUserDetails;
 import com.lmt.Kanban.entity.RefreshToken;
 import com.lmt.Kanban.entity.User;
 import com.lmt.Kanban.exception.GlobalExceptionHandler;
@@ -25,6 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -161,5 +164,29 @@ public class AuthController {
 //
 //        )
     }
+
+    //=====================
+        @GetMapping("/me")
+        public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+
+            if (authentication == null ||
+                    authentication.getPrincipal().equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+//        User user = (User) authentication.getPrincipal(); // Thằng userDetail này kh phải User entity
+            CustomUserDetails userDetails =
+                    (CustomUserDetails) authentication.getPrincipal();
+            // Vì thế nên mới chơi cái trò này
+            User user = userDetails.getUser();
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "id", user.getId(),
+                            "username", user.getUsername(),
+                            "email", user.getEmail()
+                    )
+            );
+        }
 
 }
