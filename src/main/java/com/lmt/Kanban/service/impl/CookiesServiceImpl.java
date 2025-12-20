@@ -20,7 +20,8 @@ public class CookiesServiceImpl implements CookiesService {
         Cookie cookie = new Cookie("refreshToken", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
-        cookie.setPath("/api/auth/refresh");
+//        cookie.setPath("/api/auth/refresh");
+        cookie.setPath("/api/auth");
         cookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(cookie);
     }
@@ -31,7 +32,8 @@ public class CookiesServiceImpl implements CookiesService {
         access.setMaxAge(0);
 
         Cookie refresh = new Cookie("refreshToken", null);
-        refresh.setPath("/api/auth/refresh");
+//        refresh.setPath("/api/auth/refresh");
+        refresh.setPath("/api/auth");
         refresh.setMaxAge(0);
 
         response.addCookie(access);
