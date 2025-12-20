@@ -1,5 +1,6 @@
 package com.lmt.Kanban.service.impl;
 
+import com.lmt.Kanban.entity.CustomUserDetails;
 import com.lmt.Kanban.entity.User;
 import com.lmt.Kanban.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,21 +13,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    // Thằng này sẽ được gọi thi mà login
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        // Chỉ lấy User ra thôi, rồi dùng User đó để authenticate
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found: " + username +" At userDetailsServiceImpl"));
+                        new UsernameNotFoundException("User not found: " + username));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities("USER")
-                .build();
+        return new CustomUserDetails(user);
     }
 }
 

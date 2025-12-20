@@ -1,7 +1,10 @@
 package com.lmt.Kanban.exception;
 
-public class ResourceNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+// 404 Not Found (Dùng chung)
+public class ResourceNotFoundException extends ApiException {
     public ResourceNotFoundException(String message) {
-        super(message);
+        super(message, HttpStatus.NOT_FOUND);
     }
 }
