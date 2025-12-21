@@ -3,6 +3,7 @@ package com.lmt.Kanban.service;
 import com.lmt.Kanban.dto.request.LoginRequest;
 import com.lmt.Kanban.dto.request.RegisterRequest;
 import com.lmt.Kanban.dto.response.JwtResponse;
+import com.lmt.Kanban.dto.response.UserResponse;
 import com.lmt.Kanban.entity.User;
 
 public interface AuthService {
@@ -10,5 +11,5 @@ public interface AuthService {
     JwtResponse refreshAccessToken(String refreshToken);
     void logout(String refreshToken);
     void register(RegisterRequest request);
-    User getCurrentUser(String username); // Helper để lấy user info
+    UserResponse getCurrentUser(); // Helper để lấy user info
 }

@@ -3,6 +3,7 @@ package com.lmt.Kanban.controller;
 import com.lmt.Kanban.dto.request.LoginRequest;
 import com.lmt.Kanban.dto.request.RegisterRequest;
 import com.lmt.Kanban.dto.response.JwtResponse;
+import com.lmt.Kanban.dto.response.UserResponse;
 import com.lmt.Kanban.entity.CustomUserDetails;
 import com.lmt.Kanban.entity.User;
 import com.lmt.Kanban.service.AuthService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -193,27 +195,51 @@ public class AuthController {
 //    }
 
     //=====================
-        @GetMapping("/me")
-        public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+//        @GetMapping("/me")
+//        public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+//
+//            if (authentication == null ||
+//                    authentication.getPrincipal().equals("anonymousUser")) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//            }
+//
+////        User user = (User) authentication.getPrincipal(); // Thằng userDetail này kh phải User entity
+//            CustomUserDetails userDetails =
+//                    (CustomUserDetails) authentication.getPrincipal();
+//            // Vì thế nên mới chơi cái trò này
+//            User user = userDetails.getUser();
+//
+//            return ResponseEntity.ok(
+//                    Map.of(
+//                            "id", user.getId(),
+//                            "username", user.getUsername(),
+//                            "email", user.getEmail()
+//                    )
+//            );
+//        }
 
-            if (authentication == null ||
-                    authentication.getPrincipal().equals("anonymousUser")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
 
-//        User user = (User) authentication.getPrincipal(); // Thằng userDetail này kh phải User entity
-            CustomUserDetails userDetails =
-                    (CustomUserDetails) authentication.getPrincipal();
-            // Vì thế nên mới chơi cái trò này
-            User user = userDetails.getUser();
-
-            return ResponseEntity.ok(
-                    Map.of(
-                            "id", user.getId(),
-                            "username", user.getUsername(),
-                            "email", user.getEmail()
-                    )
-            );
+    @GetMapping("/me")
+    public ResponseEntity<?> me(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
         }
 
+
+//        User user = (User) authentication.getPrincipal(); // Thằng userDetail này kh phải User entity
+        User user = userDetails.getUser();
+
+        return ResponseEntity.ok(
+                UserResponse.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .displayName(user.getDisplayName())
+                        .build()
+        );
+    }
 }

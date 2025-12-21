@@ -1,5 +1,6 @@
 package com.lmt.Kanban.service.impl;
 
+import com.lmt.Kanban.dto.response.UserResponse;
 import com.lmt.Kanban.entity.RefreshToken;
 import com.lmt.Kanban.exception.ConflictException;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
@@ -100,8 +101,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public User getCurrentUser(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getPrincipal().equals("anonymousUser")) {
+            throw new ResourceNotFoundException("User not authenticated");
+        }
+
+        // 3. Lấy Entity
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // 4. Convert sang DTO (UserResponse)
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .displayName(user.getDisplayName())
+                .build();
     }
 }

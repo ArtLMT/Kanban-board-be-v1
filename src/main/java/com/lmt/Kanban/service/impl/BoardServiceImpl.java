@@ -1,0 +1,71 @@
+package com.lmt.Kanban.service.impl;
+
+import com.lmt.Kanban.dto.request.CreateBoardRequest;
+import com.lmt.Kanban.dto.response.BoardResponse;
+import com.lmt.Kanban.dto.response.StatusResponse;
+import com.lmt.Kanban.entity.Board;
+import com.lmt.Kanban.exception.ResourceNotFoundException;
+import com.lmt.Kanban.repository.BoardRepository;
+import com.lmt.Kanban.service.BoardService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class BoardServiceImpl implements BoardService {
+    private BoardRepository boardRepository;
+
+    @Override
+    public List<StatusResponse> getAllStatus(Long boardId) {
+
+        return List.of();
+    }
+
+    @Override
+    public BoardResponse createBoard(CreateBoardRequest request) {
+        return null;
+    }
+
+    @Override
+    public BoardResponse getBoardById(Long boardId) {
+        validateBoardId(boardId);
+        Board board = boardRepository.findById(boardId).orElse(null);
+        validateBoard(board);
+
+        return createBoardResponse(board);
+    }
+
+    @Override
+    public Board getBoardEntity(Long boardID) {
+        validateBoardId(boardID);
+        Board board = boardRepository.findById(boardID).orElse(null);
+        validateBoard(board);
+
+        return board;
+    }
+
+    @Override
+    public void deleteBoard(Long boardId) {
+
+    }
+
+    private BoardResponse createBoardResponse(Board board) {
+        return BoardResponse.builder()
+                .title(board.getTitle())
+                .build();
+    }
+
+    private void validateBoardId(Long boardId) {
+        if (boardId == null) {
+            throw new IllegalArgumentException("Board ID cannot be null");
+        }
+    }
+
+    private void validateBoard(Board board) {
+        if (board == null) {
+            throw new ResourceNotFoundException("Board cannot be null");
+        }
+    }
+}
