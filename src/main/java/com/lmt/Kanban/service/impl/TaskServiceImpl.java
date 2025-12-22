@@ -10,10 +10,7 @@ import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.mapper.TaskMapper;
 import com.lmt.Kanban.repository.TaskRepository;
 import com.lmt.Kanban.security.SecurityUtils;
-import com.lmt.Kanban.service.BoardService;
-import com.lmt.Kanban.service.StatusService;
-import com.lmt.Kanban.service.TaskService;
-import com.lmt.Kanban.service.UserService;
+import com.lmt.Kanban.service.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final BoardService boardService;
     private final StatusService statusService;
+    private final TaskPermissionService taskPermissionService;
 
     private final SecurityUtils securityUtils;
     private final TaskMapper taskMapper;
@@ -38,13 +36,13 @@ public class TaskServiceImpl implements TaskService {
             throw new InvalidRequestException("Task ID cannot be null");
         }
 
-        Task task = taskRepository.findById(taskId).orElse(null);
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
-        if (task == null) {
-            throw new ResourceNotFoundException("Task not found");
-        }
+        taskPermissionService.checkCanDelete(task);
 
         taskRepository.delete(task);
+//        task.setDeleted(true);
+//        taskRepository.save(task);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse createTask(CreateTaskRequest request) {
-
+        taskPermissionService.checkCanCreate(boardService.getBoardEntity(request.getBoardId()));
 
         Task task = new Task();
         task.setTitle(request.getTitle());
@@ -85,6 +83,8 @@ public class TaskServiceImpl implements TaskService {
     // Chỉ khi nào toàn bộ đều thành công thì mới ok, còn fail thì phải fail hết
     public TaskResponse updateTask(UpdateTaskRequest request) {
         Task task = taskRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + request.getId()));
+
+        taskPermissionService.checkCanUpdate(task);
 
         // Nếu request.Title = null -> MapStruct giữ nguyên Title cũ.
         // Nếu request.Title = "Mới" -> MapStruct update thành "Mới".

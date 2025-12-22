@@ -24,4 +24,7 @@ public abstract class AbstractEntity {
     @Column(name = "updated_at")
     @UpdateTimestamp // Tự động lấy giờ hệ thống khi UPDATE
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
 }
