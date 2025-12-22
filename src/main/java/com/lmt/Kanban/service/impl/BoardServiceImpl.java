@@ -31,8 +31,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public BoardResponse getBoardById(Long boardId) {
         validateBoardId(boardId);
-        Board board = boardRepository.findById(boardId).orElse(null);
-        validateBoard(board);
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResourceNotFoundException("Board not found with ID: " + boardId));
 
         return createBoardResponse(board);
     }
@@ -40,10 +39,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public Board getBoardEntity(Long boardID) {
         validateBoardId(boardID);
-        Board board = boardRepository.findById(boardID).orElse(null);
-        validateBoard(board);
 
-        return board;
+        return boardRepository.findById(boardID).orElseThrow(() -> new ResourceNotFoundException("Board not found with ID: " + boardID));
     }
 
     @Override
@@ -60,12 +57,6 @@ public class BoardServiceImpl implements BoardService {
     private void validateBoardId(Long boardId) {
         if (boardId == null) {
             throw new IllegalArgumentException("Board ID cannot be null");
-        }
-    }
-
-    private void validateBoard(Board board) {
-        if (board == null) {
-            throw new ResourceNotFoundException("Board cannot be null");
         }
     }
 }

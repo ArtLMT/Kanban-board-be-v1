@@ -7,4 +7,5 @@ import com.lmt.Kanban.entity.User;
 public interface UserService {
     UserResponse createUser(CreateUserRequest request);
     User getUserEntity(Long userId);
+
 }

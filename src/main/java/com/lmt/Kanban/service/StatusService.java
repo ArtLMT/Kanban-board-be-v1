@@ -1,5 +1,6 @@
 package com.lmt.Kanban.service;
 
+import com.lmt.Kanban.dto.response.StatusResponse;
 import com.lmt.Kanban.dto.response.TaskResponse;
 import com.lmt.Kanban.entity.Status;
 
@@ -12,4 +13,6 @@ public interface StatusService {
     void movePosition(Long statusId, Integer position);
     List<TaskResponse> getTasksByStatusId(Long statusId);
     Status getStatusEntity(Long statusId);
+    StatusResponse getStatusById(Long statusId);
+    Boolean checkStatusInBoard(Long boardId, Long statusId);
 }

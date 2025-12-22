@@ -7,9 +7,11 @@ import com.lmt.Kanban.exception.InvalidRequestException;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.UserRepository;
 import com.lmt.Kanban.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 

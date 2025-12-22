@@ -95,6 +95,7 @@ public class AuthController {
 
         JwtResponse jwtResponse = authService.refreshAccessToken(refreshToken);
         cookiesService.addAccessToken(response, jwtResponse.getAccessToken());
+        cookiesService.addRefreshToken(response, jwtResponse.getRefreshToken());
 
         return ResponseEntity.ok(jwtResponse);
     }
