@@ -2,6 +2,7 @@ package com.lmt.Kanban.security;
 
 
 import com.lmt.Kanban.entity.User;
+import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,12 @@ public class SecurityUtils {
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
                 authentication.getPrincipal().equals("anonymousUser")) {
-            throw new ResourceNotFoundException("Unauthenticated user");
+            throw new ResourceNotFoundException(ErrorCode.ACCESS_DENIED ,"Unauthenticated user");
         }
 
         String username = authentication.getName();
 
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND, "User not found with username: " + username));
     }
 }

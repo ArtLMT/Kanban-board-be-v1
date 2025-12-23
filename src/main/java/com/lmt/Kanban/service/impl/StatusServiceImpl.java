@@ -3,6 +3,7 @@ package com.lmt.Kanban.service.impl;
 import com.lmt.Kanban.dto.response.StatusResponse;
 import com.lmt.Kanban.dto.response.TaskResponse;
 import com.lmt.Kanban.entity.Status;
+import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.BoardRepository;
 import com.lmt.Kanban.repository.StatusRepository;
@@ -27,7 +28,7 @@ public class StatusServiceImpl implements StatusService {
     @Override
     public Status getStatusEntity (Long statusId) {
 
-        return statusRepository.findById(statusId).orElseThrow(() -> new ResourceNotFoundException("Status not found with ID: " + statusId));
+        return statusRepository.findById(statusId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STATUS_NOT_FOUND,"Status not found with ID: " + statusId));
     }
 
     @Override

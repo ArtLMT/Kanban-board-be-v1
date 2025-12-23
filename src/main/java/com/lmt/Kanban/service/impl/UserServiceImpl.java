@@ -3,6 +3,7 @@ package com.lmt.Kanban.service.impl;
 import com.lmt.Kanban.dto.request.CreateUserRequest;
 import com.lmt.Kanban.dto.response.UserResponse;
 import com.lmt.Kanban.entity.User;
+import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.InvalidRequestException;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.UserRepository;
@@ -37,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     private void validateUser(User user) {
         if (user == null ) {
-            throw new ResourceNotFoundException("User not found!");
+            throw new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND,"User not found!");
         }
     }
 }

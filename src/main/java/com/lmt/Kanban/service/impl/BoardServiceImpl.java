@@ -4,6 +4,7 @@ import com.lmt.Kanban.dto.request.CreateBoardRequest;
 import com.lmt.Kanban.dto.response.BoardResponse;
 import com.lmt.Kanban.dto.response.StatusResponse;
 import com.lmt.Kanban.entity.Board;
+import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.repository.BoardRepository;
 import com.lmt.Kanban.service.BoardService;
@@ -31,7 +32,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public BoardResponse getBoardById(Long boardId) {
         validateBoardId(boardId);
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResourceNotFoundException("Board not found with ID: " + boardId));
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.BOARD_NOT_FOUND,"Board not found with ID: " + boardId));
 
         return createBoardResponse(board);
     }
@@ -40,7 +41,7 @@ public class BoardServiceImpl implements BoardService {
     public Board getBoardEntity(Long boardID) {
         validateBoardId(boardID);
 
-        return boardRepository.findById(boardID).orElseThrow(() -> new ResourceNotFoundException("Board not found with ID: " + boardID));
+        return boardRepository.findById(boardID).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.BOARD_NOT_FOUND,"Board not found with ID: " + boardID));
     }
 
     @Override

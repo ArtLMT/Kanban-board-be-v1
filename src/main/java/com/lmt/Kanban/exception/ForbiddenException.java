@@ -1,7 +1,9 @@
 package com.lmt.Kanban.exception;
 
-public class ForbiddenException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ForbiddenException extends ApiException {
     public ForbiddenException(String message) {
-        super(message);
+        super(ErrorCode.ACCESS_DENIED, message, HttpStatus.FORBIDDEN);
     }
 }

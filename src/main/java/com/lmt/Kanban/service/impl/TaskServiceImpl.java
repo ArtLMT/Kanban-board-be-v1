@@ -5,6 +5,7 @@ import com.lmt.Kanban.dto.request.UpdateTaskRequest;
 import com.lmt.Kanban.dto.response.TaskResponse;
 import com.lmt.Kanban.entity.Status;
 import com.lmt.Kanban.entity.Task;
+import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.InvalidRequestException;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.mapper.TaskMapper;
@@ -36,7 +37,7 @@ public class TaskServiceImpl implements TaskService {
             throw new InvalidRequestException("Task ID cannot be null");
         }
 
-        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.TASK_NOT_FOUND,"Task not found with ID: " + taskId));
 
         taskPermissionService.checkCanDelete(task);
 
@@ -47,7 +48,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse getTaskById(Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.TASK_NOT_FOUND,"Task not found with ID: " + taskId));
 
         return createTaskResponse(task);
     }
@@ -82,7 +83,7 @@ public class TaskServiceImpl implements TaskService {
     // Thằng Transactional này sẽ giúp A kh bị trừ tiền nếu mà B bị lỗi
     // Chỉ khi nào toàn bộ đều thành công thì mới ok, còn fail thì phải fail hết
     public TaskResponse updateTask(UpdateTaskRequest request) {
-        Task task = taskRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + request.getId()));
+        Task task = taskRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.TASK_NOT_FOUND,"Task not found with ID: " + request.getId()));
 
         taskPermissionService.checkCanUpdate(task);
 
