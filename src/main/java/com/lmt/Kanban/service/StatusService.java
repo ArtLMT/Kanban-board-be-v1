@@ -13,11 +13,11 @@ import java.util.List;
 public interface StatusService {
     StatusResponse createStatus(Board board, CreateStatusRequest request);
     void deleteStatus(Long statusId);
-    StatusResponse updateStatus(UpdateStatusRequest request);
+    StatusResponse updateStatus(Long id,UpdateStatusRequest request);
     void movePosition(Long statusId, Integer position);
     Status validateStatusInBoard(Long statusId, Long boardId);
     StatusResponse getStatusById(Long statusId);
     Boolean checkStatusInBoard(Long boardId, Long statusId);
-    List<StatusResponse> getAllStatus();
+//    List<StatusResponse> getAllStatus();
     List<StatusResponse> getAllStatus(Long boardId);
 }

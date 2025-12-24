@@ -15,17 +15,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/status")
+@RequestMapping("/statuses")
 @RequiredArgsConstructor
 public class StatusController {
     private final StatusService statusService;
     private final BoardService boardService;
 
-    @GetMapping("")
-    public ResponseEntity<List<StatusResponse>> getAllStatuses() {
-        ;
-        return ResponseEntity.ok(statusService.getAllStatus());
-    }
+//    @GetMapping("")
+//    public ResponseEntity<List<StatusResponse>> getAllStatuses() {
+//        return ResponseEntity.ok(statusService.getAllStatus());
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<StatusResponse> getStatusById(@PathVariable Long id) {
@@ -45,9 +44,8 @@ public class StatusController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateStatusRequest request) {
 
-        request.setId(id); // Set ID từ path vào request
-        statusService.updateStatus(request);
-        return ResponseEntity.ok().body(statusService.getStatusById(id));
+//        request.setId(id); // Set ID từ path vào request
+        return ResponseEntity.ok().body(statusService.updateStatus(id, request));
     }
 
     // API kéo thả (Drag & Drop)

@@ -10,8 +10,8 @@ import lombok.Data;
 @Data
 @Builder
 public class UpdateTaskRequest {
-    @NotNull(message = "Task ID can't be empty")
-    private Long id;
+//    @NotNull(message = "Task ID can't be empty")
+//    private Long id;
 
     @Pattern(regexp = "^(?!\\s*$).+", message = "Title cannot be empty")
     @Schema(description = "Title of the task", example = "Task 1")

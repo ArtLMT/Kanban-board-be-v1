@@ -8,46 +8,48 @@ import com.lmt.Kanban.exception.ForbiddenException;
 import com.lmt.Kanban.exception.InvalidRequestException;
 import com.lmt.Kanban.repository.BoardMemberRepository;
 import com.lmt.Kanban.security.SecurityUtils;
-import com.lmt.Kanban.service.TaskPermissionService;
+import com.lmt.Kanban.service.PermissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TaskPermissionServiceImpl implements TaskPermissionService {
-
+public class PermissionServiceImpl implements PermissionService {
     private final BoardMemberRepository boardMemberRepository;
     private final SecurityUtils securityUtils;
 
     @Override
-    public void checkCanView(Task task) {
+    public void checkBoardMember(Long boardId) {
         User currentUser = securityUtils.getCurrentUser();
-
-        if (!isBoardMember(task.getBoard().getId(), currentUser.getId())) {
-            throw new ForbiddenException("You are not a member of this board. You can't view tasks in this board.");
+        if (!isBoardMember(boardId, currentUser.getId())) {
+            throw new ForbiddenException("You are not a member of this board.");
         }
     }
 
     @Override
-    public void checkCanCreate(Board board) {
+    public void checkBoardAdminOrOwner(Long boardId) {
         User currentUser = securityUtils.getCurrentUser();
-
-        BoardRole role = getUserRole(board.getId(), currentUser.getId());
+        BoardRole role = getUserRole(boardId, currentUser.getId());
 
         if (role != BoardRole.OWNER && role != BoardRole.ADMIN) {
-            throw new ForbiddenException("You don't have permission to create task in this board");
+            throw new ForbiddenException("You don't have permission (Admin/Owner required).");
         }
     }
 
 
     @Override
-    public void checkCanUpdate(Task task) {
+    public void checkTaskView(Task task) {
+        checkBoardMember(task.getBoard().getId());
+    }
+
+    @Override
+    public void checkTaskUpdate(Task task) {
         User currentUser = securityUtils.getCurrentUser();
+        Long boardId = task.getBoard().getId();
+        BoardRole role = getUserRole(boardId, currentUser.getId());
 
-        BoardRole role = getUserRole(task.getBoard().getId(), currentUser.getId());
-
-        if (role == null) {
-            throw new ForbiddenException("You are not a board member");
+        if (role == BoardRole.OWNER || role == BoardRole.ADMIN) {
+            return;
         }
 
         if (role == BoardRole.MEMBER) {
@@ -62,24 +64,13 @@ public class TaskPermissionServiceImpl implements TaskPermissionService {
     }
 
     @Override
-    public void checkCanDelete(Task task) {
-        User currentUser = securityUtils.getCurrentUser();
-
-        BoardRole role = getUserRole(task.getBoard().getId(), currentUser.getId());
-
-        if (role == null) {
-            throw new ForbiddenException("You are not a board member");
-        }
-
-
-        if (role != BoardRole.OWNER && role != BoardRole.ADMIN) {
-            throw new ForbiddenException("Only owner or admin can delete task");
-        }
+    public void checkTaskDelete(Task task) {
+        checkBoardAdminOrOwner(task.getBoard().getId());
     }
 
     @Override
-    public void checkCanAssign(Task task, User assignee) {
-        if (!isBoardMember(task.getBoard().getId(), assignee.getId())) {
+    public void checkTaskAssign(Long boardId, Long assigneeId) {
+        if (!isBoardMember(boardId, assigneeId)) {
             throw new InvalidRequestException("Assignee is not a board member");
         }
     }

@@ -49,6 +49,10 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
+    public void validateBoard(Long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.BOARD_NOT_FOUND,"Board not found with ID: " + boardId));
+    }
+
     private BoardResponse createBoardResponse(Board board) {
         return BoardResponse.builder()
                 .title(board.getTitle())

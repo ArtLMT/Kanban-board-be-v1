@@ -13,6 +13,6 @@ public interface BoardService {
     BoardResponse createBoard(CreateBoardRequest request);
     BoardResponse getBoardById(Long boardId);
     Board getBoardEntity(Long boardID);
-//    void checkStatus(Status);
+    void validateBoard(Long boardId);
     void deleteBoard(Long boardId);
 }

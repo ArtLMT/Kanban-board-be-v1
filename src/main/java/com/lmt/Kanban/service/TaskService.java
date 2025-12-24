@@ -14,5 +14,7 @@ public interface TaskService {
     TaskResponse getTaskById(Long taskId);
     TaskResponse createTask(Board board, Status status, CreateTaskRequest request);
     List<TaskResponse> getAllTasks();
-    TaskResponse updateTask(UpdateTaskRequest request);
+    TaskResponse updateTask( Long taskId,UpdateTaskRequest request);
+    List<TaskResponse> getAllTasks(Long statusId);
+    List<TaskResponse> getAllTasks(Long boardId, Long statusId);
 }

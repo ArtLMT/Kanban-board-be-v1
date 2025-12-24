@@ -18,7 +18,6 @@ public interface StatusRepository extends JpaRepository<Status, Long> {
     @Query("SELECT MAX(s.position) FROM Status s WHERE s.board.id = :boardId")
     Integer findMaxPositionByBoardId(@Param("boardId") Long boardId);
 
-
     // Case 1: Kéo từ Dưới lên Trên (VD: Từ 5 về 2)
     @Modifying
     @Query("UPDATE Status s SET s.position = s.position + 1 " +
@@ -30,4 +29,10 @@ public interface StatusRepository extends JpaRepository<Status, Long> {
     @Query("UPDATE Status s SET s.position = s.position - 1 " +
             "WHERE s.board.id = :boardId AND s.position > :oldPos AND s.position <= :newPos")
     void shiftLeft(@Param("boardId") Long boardId, @Param("oldPos") Integer oldPos, @Param("newPos") Integer newPos);
+
+    // Giờ mà nó xóa status thì position của mấy đứa sau thằng bị xóa cũng phải đổi theo
+    @Modifying
+    @Query("UPDATE Status s SET s.position = s.position - 1 " +
+            "WHERE s.board.id = :boardId AND s.position > :deletedPos")
+    void shiftLeftAfterDelete(@Param("boardId") Long boardId, @Param("deletedPos") Integer deletedPos);
 }

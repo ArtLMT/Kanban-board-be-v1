@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
     private final BoardService boardService;
     private final StatusService statusService;
 
-    @GetMapping("/tasks")
+    @GetMapping("")
     public ResponseEntity<List<TaskResponse>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
@@ -46,9 +46,12 @@ public class TaskController {
                 .body(taskService.createTask(board, status ,request));
     }
 
-    @PutMapping("")
-    public ResponseEntity<TaskResponse> updateTask(@Valid @RequestBody UpdateTaskRequest request) {
-        return ResponseEntity.ok(taskService.updateTask(request));
+    @PutMapping("{id}")
+    public ResponseEntity<TaskResponse> updateTask(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateTaskRequest request
+    ) {
+        return ResponseEntity.ok(taskService.updateTask(id,request));
     }
 
     @DeleteMapping("/{id}")
