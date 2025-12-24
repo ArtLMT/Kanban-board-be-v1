@@ -19,7 +19,6 @@ public class UpdateTaskRequest {
     private String description;
 
     private Long statusId;
-    private Long boardId;
 
     private Long assigneeId;
 }

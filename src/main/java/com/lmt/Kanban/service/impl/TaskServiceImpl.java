@@ -3,6 +3,7 @@ package com.lmt.Kanban.service.impl;
 import com.lmt.Kanban.dto.request.CreateTaskRequest;
 import com.lmt.Kanban.dto.request.UpdateTaskRequest;
 import com.lmt.Kanban.dto.response.TaskResponse;
+import com.lmt.Kanban.entity.Board;
 import com.lmt.Kanban.entity.Status;
 import com.lmt.Kanban.entity.Task;
 import com.lmt.Kanban.exception.ErrorCode;
@@ -54,15 +55,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse createTask(CreateTaskRequest request) {
-        taskPermissionService.checkCanCreate(boardService.getBoardEntity(request.getBoardId()));
+    public TaskResponse createTask(Board board, Status status ,CreateTaskRequest request) {
+        taskPermissionService.checkCanCreate(board);
 
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setCreator(securityUtils.getCurrentUser());
-        task.setBoard(boardService.getBoardEntity(request.getBoardId()));
-        task.setStatus(statusService.getStatusEntity(request.getStatusId()));
+        task.setBoard(board);
+        task.setStatus(status);
         taskRepository.save(task);
         return createTaskResponse(task);
     }
@@ -94,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.getStatusId() != null) {
             if (!request.getStatusId().equals(task.getStatus().getId())) {
 
-                Status newStatus = statusService.getStatusEntity(request.getStatusId());
+                Status newStatus = statusService.validateStatusInBoard(request.getStatusId(), task.getBoard().getId());
 
                 if (!newStatus.getBoard().getId().equals(task.getBoard().getId())) {
                     throw new InvalidRequestException("Status " + request.getStatusId() + " does not belong to Board " + task.getBoard().getId());

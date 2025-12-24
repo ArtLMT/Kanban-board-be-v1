@@ -78,7 +78,7 @@ public class AuthController {
         cookiesService.addAccessToken(response, jwtResponse.getAccessToken());
         cookiesService.addRefreshToken(response, jwtResponse.getRefreshToken());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(jwtResponse);
+        return ResponseEntity.ok(jwtResponse);
     }
 
 
@@ -171,7 +171,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         authService.register(request);
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
 //    @PostMapping("/register")
