@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatusController {
     private final StatusService statusService;
-    private final BoardService boardService;
 
 //    @GetMapping("")
 //    public ResponseEntity<List<StatusResponse>> getAllStatuses() {
@@ -31,10 +30,14 @@ public class StatusController {
         return ResponseEntity.ok(statusService.getStatusById(id));
     }
 
+    @GetMapping("/board/{boardID}")
+    public ResponseEntity<List<StatusResponse>> getAllStatusByBoardId(@PathVariable Long boardID) {
+        return ResponseEntity.ok(statusService.getAllStatus(boardID));
+    }
+
     @PostMapping("")
     public ResponseEntity<StatusResponse> createStatus(@Valid @RequestBody CreateStatusRequest request) {
-        Board board = boardService.getBoardEntity(request.getBoardId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(statusService.createStatus(board , request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(statusService.createStatus( request));
     }
 
     // Khứa này chỉ dùng cho update field đơn giản thôi, còn position thì phải tạo cái riêng
@@ -59,7 +62,7 @@ public class StatusController {
     }
 
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStatus(@PathVariable Long id) {
         statusService.deleteStatus(id);
         return ResponseEntity.noContent().build();

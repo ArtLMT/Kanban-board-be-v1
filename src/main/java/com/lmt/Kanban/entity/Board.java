@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "boards")
 @Builder@AttributeOverride(name = "id", column = @Column(name = "board_id"))
+@SQLDelete(sql = "UPDATE boards SET is_deleted = true WHERE board_id = ?")
+@Where(clause = "is_deleted = false")
 public class Board extends AbstractEntity {
 
     @NotBlank(message = "Title can't be empty")

@@ -1,15 +1,15 @@
 package com.lmt.Kanban.controller;
 
+import com.lmt.Kanban.dto.request.CreateBoardRequest;
+import com.lmt.Kanban.dto.request.UpdateBoardRequest;
 import com.lmt.Kanban.dto.response.BoardResponse;
-import com.lmt.Kanban.dto.response.StatusResponse;
 import com.lmt.Kanban.service.BoardService;
 import com.lmt.Kanban.service.StatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,16 +18,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
-    private final StatusService statusService;
 
+    // Mình phải thông qua BoardMember để lấy toàn bộ board ra, kể cả board mà user không phải OWNER, lấy cả MEMBER, ADMIN, VIEWER luôn mới hợp lý
+    @GetMapping("")
+    public ResponseEntity<List<BoardResponse>> getMyBoards() {
+        return ResponseEntity.ok(boardService.getMyBoards());
+    }
 
+    @GetMapping("/{boardId}")
+    public ResponseEntity<BoardResponse> getBoardById(@PathVariable Long boardId) {
+        return ResponseEntity.ok(boardService.getBoardById(boardId));
+    }
 
-    @GetMapping("/{boardID}/statuses")
-    public ResponseEntity<List<StatusResponse>> getAllStatusByBoardId(@PathVariable Long boardID) {
-//        BoardResponse board = boardService.getBoardById(boardID);
+    @PostMapping("")
+    public ResponseEntity<BoardResponse> createBoard(@Valid @RequestBody CreateBoardRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(request));
+    }
 
-        List<StatusResponse> statuses = statusService.getAllStatus(boardID);
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<?> deleteBoard(@PathVariable Long boardId) {
+        boardService.deleteBoard(boardId);
+        return ResponseEntity.noContent().build();
+    }
 
-        return ResponseEntity.ok(statuses);
+    @PutMapping("/{boardId}")
+    public ResponseEntity<BoardResponse> updateBoard(@PathVariable Long boardId, @RequestBody UpdateBoardRequest request) {
+        return ResponseEntity.ok(boardService.updateBoard(boardId ,request));
     }
 }

@@ -10,6 +10,8 @@ import com.lmt.Kanban.exception.ErrorCode;
 import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.mapper.TaskMapper;
 import com.lmt.Kanban.repository.TaskRepository;
+import com.lmt.Kanban.reslover.BoardResolver;
+import com.lmt.Kanban.reslover.StatusResolver;
 import com.lmt.Kanban.security.SecurityUtils;
 import com.lmt.Kanban.service.*;
 import lombok.AllArgsConstructor;
@@ -22,9 +24,11 @@ import java.util.List;
 @AllArgsConstructor
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
-    private final BoardService boardService;
     private final StatusService statusService;
     private final PermissionService permissionService;
+
+    private final BoardResolver boardResolver;
+    private final StatusResolver statusResolver;
 
     private final SecurityUtils securityUtils;
     private final TaskMapper taskMapper;
@@ -49,8 +53,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse createTask(Board board, Status status, CreateTaskRequest request) {
+    public TaskResponse createTask(CreateTaskRequest request) {
+        Board board = boardResolver.findByIdOrThrow(request.getBoardId());
+
         permissionService.checkBoardAdminOrOwner(board.getId());
+
+        Status status = statusResolver.findByIdOrThrow(request.getStatusId());
 
         Task task = taskMapper.toEntity(request);
 
@@ -63,15 +71,6 @@ public class TaskServiceImpl implements TaskService {
         }
 
         return taskMapper.toResponse(taskRepository.save(task));
-    }
-
-    @Override
-    public List<TaskResponse> getAllTasks() {
-        List<Task> taskEntities = taskRepository.findAll();
-
-        return taskEntities.stream()
-                .map(taskMapper::toResponse)
-                .toList();
     }
 
     @Override
@@ -120,17 +119,28 @@ public class TaskServiceImpl implements TaskService {
                 .toList();
     }
 
-    @Override
-    public List<TaskResponse> getAllTasks(Long boardId, Long statusId) {
-        statusService.validateStatusInBoard(statusId, boardId);
-        List<Task> tasks = taskRepository.findByBoardIdAndStatusId(boardId, statusId);
-
-        return tasks.stream()
-                .map(taskMapper::toResponse)
-                .toList();
-    }
-
     private Task getTaskEntity(Long taskId) {
         return taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.TASK_NOT_FOUND, "Task not found with ID: " + taskId));
     }
 }
+
+// Thằng này vứt vì kh cần thiết, mình chỉ cấn ném 1 cục cho FE tự lo được rồi
+// Nếu chia theo từng status kiểu này thì sẽ dẵn dến ChattyAPI -> Gọi nhiều quá
+
+//    public List<TaskResponse> getAllTasks(Long boardId, Long statusId) {
+//        statusService.validateStatusInBoard(statusId, boardId);
+//        List<Task> tasks = taskRepository.findByBoardIdAndStatusId(boardId, statusId);
+//
+//        return tasks.stream()
+//                .map(taskMapper::toResponse)
+//                .toList();
+//    }
+
+//    @Override
+//    public List<TaskResponse> getAllTasks() {
+//        List<Task> taskEntities = taskRepository.findAll();
+//
+//        return taskEntities.stream()
+//                .map(taskMapper::toResponse)
+//                .toList();
+//    }

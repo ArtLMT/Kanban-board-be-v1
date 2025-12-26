@@ -11,6 +11,7 @@ import com.lmt.Kanban.exception.ResourceNotFoundException;
 import com.lmt.Kanban.mapper.StatusMapper;
 import com.lmt.Kanban.repository.BoardRepository;
 import com.lmt.Kanban.repository.StatusRepository;
+import com.lmt.Kanban.reslover.BoardResolver;
 import com.lmt.Kanban.service.BoardService;
 import com.lmt.Kanban.service.StatusService;
 import com.lmt.Kanban.service.PermissionService;
@@ -25,12 +26,15 @@ import java.util.List;
 public class StatusServiceImpl implements StatusService {
     private final PermissionService permissionService;
     private final StatusRepository statusRepository;
-    private final BoardService boardService;
+//    private final BoardService boardService;
+    private final BoardResolver boardResolver;
 
     private final StatusMapper statusMapper;
 
     @Override
-    public StatusResponse createStatus( Board board,CreateStatusRequest request) {
+    public StatusResponse createStatus(CreateStatusRequest request) {
+        Board board = boardResolver.findByIdOrThrow(request.getBoardId());
+
         permissionService.checkBoardAdminOrOwner(board.getId());
 
         Status status = statusMapper.toEntity(request);
@@ -109,7 +113,7 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public List<StatusResponse> getAllStatus(Long boardId) {
-        boardService.validateBoard(boardId);
+        boardResolver.findByIdOrThrow(boardId);
 
         permissionService.checkBoardMember(boardId);
 
@@ -127,11 +131,6 @@ public class StatusServiceImpl implements StatusService {
 //                .map(statusMapper::toResponse)
 //                .toList();
 //    }
-
-    @Override
-    public Boolean checkStatusInBoard(Long boardId, Long statusId) {
-        return statusRepository.existsByIdAndBoardId(statusId, boardId);
-    }
 
     private Status getStatusEntity (Long statusId) {
         return statusRepository.findById(statusId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STATUS_NOT_FOUND,"Status not found with ID: " + statusId));
