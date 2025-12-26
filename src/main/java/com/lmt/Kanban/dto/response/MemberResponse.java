@@ -4,6 +4,8 @@ import com.lmt.Kanban.common.enums.BoardRole;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class MemberResponse {
@@ -12,4 +14,5 @@ public class MemberResponse {
     private String email;
 
     private BoardRole role;
+    private LocalDateTime joinTime;
 }

@@ -3,6 +3,9 @@ package com.lmt.Kanban.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import com.lmt.Kanban.common.enums.BoardRole;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 
 @Entity
@@ -10,7 +13,7 @@ import com.lmt.Kanban.common.enums.BoardRole;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(
         name="board_members",
         uniqueConstraints = {
@@ -18,6 +21,8 @@ import com.lmt.Kanban.common.enums.BoardRole;
         }
 )
 @AttributeOverride(name = "id", column = @Column(name = "board_member_id"))
+@SQLDelete(sql = "UPDATE board_members SET is_deleted = true WHERE board_member_id = ?")
+@Where(clause = "is_deleted = false")
 public class BoardMember extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)

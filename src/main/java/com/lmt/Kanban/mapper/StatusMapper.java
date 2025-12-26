@@ -8,7 +8,6 @@ import org.mapstruct.*;
 
 @Mapper(
         componentModel = "spring",
-        builder = @Builder(disableBuilder = true),
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 public interface StatusMapper {
