@@ -1,9 +1,10 @@
 package com.lmt.Kanban.exception;
 
+import com.lmt.Kanban.dto.response.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,41 +13,78 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
+    /* ===================== BUSINESS EXCEPTIONS ===================== */
+
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<Map<String, Object>> handleApiException(ApiException ex) {
-        return buildResponse(ex.getStatus(), ex.getMessage(), null);
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex) {
+
+        log.warn("Business error [{}]: {}", ex.getCode(), ex.getMessage());
+
+        ErrorResponse response = new ErrorResponse(
+                ex.getStatus().value(),
+                ex.getStatus().getReasonPhrase(),
+                ex.getMessage(),
+                ex.getCode().name()
+        );
+
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
+    /* ===================== VALIDATION ===================== */
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
-        return buildResponse(HttpStatus.BAD_REQUEST, "Validation Failed", errors);
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                "Input data contains errors",
+                ErrorCode.VALIDATION_FAILED.name()
+        );
+        response.setDetails(errors);
+
+        return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, InternalAuthenticationServiceException.class})
-    public ResponseEntity<Map<String, Object>> handleSecurityException(Exception ex) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Username or password incorrect", null);
+    /* ===================== AUTH ===================== */
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+
+        log.warn("Authentication failed");
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                "Username or password incorrect",
+                ErrorCode.INVALID_CREDENTIALS.name()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
+
+    /* ===================== FALLBACK ===================== */
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        ex.printStackTrace();
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", null);
-    }
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
 
-    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message, Object details) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", status.value());
-        body.put("error", message);
-        body.put("timestamp", System.currentTimeMillis());
-        if (details != null) {
-            body.put("details", details);
-        }
-        return new ResponseEntity<>(body, status);
+        log.error("Unexpected error", ex);
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "An unexpected error occurred. Please contact support.",
+                ErrorCode.INTERNAL_ERROR.name()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

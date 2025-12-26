@@ -3,6 +3,9 @@ package com.lmt.Kanban.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(
         name = "status",
         uniqueConstraints = {
@@ -20,6 +23,8 @@ import java.util.List;
         }
 )
 @AttributeOverride(name = "id", column = @Column(name = "status_id"))
+@SQLDelete(sql = "UPDATE status SET is_deleted = true WHERE status_id = ?")
+@Where(clause = "is_deleted = false")
 public class Status extends AbstractEntity{
 
     @NotBlank(message = "Status can't be empty")

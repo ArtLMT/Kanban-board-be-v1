@@ -3,15 +3,20 @@ package com.lmt.Kanban.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "tasks")
 @AttributeOverride(name = "id", column = @Column(name = "task_id"))
+@SQLDelete(sql = "UPDATE tasks SET is_deleted = true WHERE task_id = ?")
+@Where(clause = "is_deleted = false")
 public class Task extends AbstractEntity {
 
     @NotBlank(message = "Title can't be empty") // NotBlamk kiểm tra đầu vào, chặn FE gửi

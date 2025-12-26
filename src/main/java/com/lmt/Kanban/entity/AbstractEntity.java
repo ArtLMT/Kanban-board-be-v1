@@ -1,8 +1,11 @@
 package com.lmt.Kanban.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +14,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass // Bắt buộc: Để JPA hiểu class này không tạo bảng riêng, mà các bảng con sẽ kế thừa cột của nó.
+@SuperBuilder(toBuilder = true) // <--- QUAN TRỌNG: Thay cho @Builder
+@NoArgsConstructor // <--- Bắt buộc cho JPA
+@AllArgsConstructor // <--- Bắt buộc cho SuperBuilder
 public abstract class AbstractEntity {
 
     @Id
@@ -24,4 +30,7 @@ public abstract class AbstractEntity {
     @Column(name = "updated_at")
     @UpdateTimestamp // Tự động lấy giờ hệ thống khi UPDATE
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
 }
